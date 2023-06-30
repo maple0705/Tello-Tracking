@@ -66,6 +66,7 @@ class TelloUI:
 
         # the sending_command will send command to tello every 5 seconds
         self.sending_command_thread = threading.Thread(target = self._sendingCommand)
+        
     def videoLoop(self):
         """
         The mainloop thread of Tkinter 
@@ -79,17 +80,21 @@ class TelloUI:
             while not self.stopEvent.is_set():                
                 system = platform.system()
 
-            # read the frame for GUI show
+                # read the frame for GUI show
                 self.frame = self.tello.read()
                 if self.frame is None or self.frame.size == 0:
                     continue 
-            
-            # transfer the format from frame to image         
-                image = Image.fromarray(self.frame)
 
-            # we found compatibility problem between Tkinter,PIL and Macos,and it will 
-            # sometimes result the very long preriod of the "ImageTk.PhotoImage" function,
-            # so for Macos,we start a new thread to execute the _updateGUIImage function.
+                # add image processing here
+                cv_image = cv2.resize(self.frame, dsize=(480, 360))
+
+                # transfer the format from frame to image         
+                #image = Image.fromarray(self.frame)
+                image = Image.fromarray(cv_image)
+
+                # we found compatibility problem between Tkinter,PIL and Macos,and it will 
+                # sometimes result the very long preriod of the "ImageTk.PhotoImage" function,
+                # so for Macos,we start a new thread to execute the _updateGUIImage function.
                 if system =="Windows" or system =="Linux":                
                     self._updateGUIImage(image)
 
@@ -97,6 +102,7 @@ class TelloUI:
                     thread_tmp = threading.Thread(target=self._updateGUIImage,args=(image,))
                     thread_tmp.start()
                     time.sleep(0.03)                                                            
+
         except RuntimeError as e:
             print("[INFO] caught a RuntimeError")
 
@@ -246,6 +252,7 @@ class TelloUI:
         # save the file
         cv2.imwrite(p, cv2.cvtColor(self.frame, cv2.COLOR_RGB2BGR))
         print(("[INFO] saved {}".format(filename)))
+        print(p)
 
 
     def pauseVideo(self):
