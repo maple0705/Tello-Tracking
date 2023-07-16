@@ -1,1 +1,6 @@
 /.DS_Store
+PY3_ObjTracking_Test/video/*.mp4
+.gitignore
+yolov8m.pt
+yolov8n.pt
+yolov8x.pt
