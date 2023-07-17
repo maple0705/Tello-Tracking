@@ -280,9 +280,9 @@ class Tello:
         height = list(filter(str.isdigit, height))
         try:
             height = int(height)
-            self.last_height = height
+            #self.last_height = height
         except:
-            height = self.last_height
+            #height = self.last_height
             pass
         return height
 
@@ -341,6 +341,29 @@ class Tello:
             pass
 
         return speed
+    
+    def get_temp(self):
+        """Returns Tello temperature.
+
+        Returns:
+            int: Tello temperature
+
+        """
+        
+        temp = self.send_command('temp?')
+
+        try:
+            temp = temp.splitlines()[0]             # [temp_low~temp_highC][¥n]
+            print(temp)
+            
+            temp_low, temp_high = temp.split("~")   # [temp_low][temp_highC]
+            temp_high = temp_high.split("C")[0]     # [temp_high]
+
+            temp = (int(temp_low) + int(temp_high)) / 2
+        except:
+            pass
+
+        return temp
 
     def land(self):
         """Initiates landing.
