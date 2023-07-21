@@ -57,7 +57,6 @@ class FrontEnd(object):
         self.fps = 120
 
         # create update timer
-        #pygame.time.set_timer(pygame.USEREVENT + 1, 1000 // FPS_var)
         pygame.time.set_timer(pygame.USEREVENT + 1, 1000 // self.fps)
 
     def run(self):
@@ -182,7 +181,9 @@ class FrontEnd(object):
 
             # key input detection
             for event in pygame.event.get():
-                if event.type == pygame.QUIT:
+                if event.type == pygame.USEREVENT + 1:
+                    self.update()
+                elif event.type == pygame.QUIT:
                     should_stop = True
                 elif event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_ESCAPE:
@@ -191,8 +192,6 @@ class FrontEnd(object):
                         self.keydown(event.key)
                 elif event.type == pygame.KEYUP:
                     self.keyup(event.key)
-                elif event.type == pygame.USEREVENT + 1:
-                    self.update()
 
         # Call it always before finishing. To deallocate resources.
         self.tello.end()
