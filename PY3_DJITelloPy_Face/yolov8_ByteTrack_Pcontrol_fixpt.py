@@ -5,6 +5,8 @@ import cv2
 import pygame
 import numpy as np
 import time
+import threading
+import logging
 import colorama
 
 colorama.init(autoreset=True)
@@ -41,6 +43,7 @@ class FrontEnd(object):
 
         # Init Tello object that interacts with the Tello drone
         self.tello = Tello()
+        #self.tello.LOGGER.setLevel(logging.WARNING)
 
         # Drone velocities between -100~100
         self.for_back_velocity = 0
@@ -59,6 +62,9 @@ class FrontEnd(object):
         # create update timer
         pygame.time.set_timer(pygame.USEREVENT + 1, 1000 // self.fps)
 
+        # the sending_command will send command to tello every 10 seconds
+        self.sending_command_thread = threading.Thread(target = self._sendingCommand)
+
     def run(self):
 
         self.tello.connect()
@@ -70,6 +76,9 @@ class FrontEnd(object):
 
         frame_read = self.tello.get_frame_read()
 
+        self.sending_command_thread.setDaemon(True)
+        self.sending_command_thread.start()
+
         should_stop = False
         while not should_stop:
             if frame_read.stopped:
@@ -79,8 +88,6 @@ class FrontEnd(object):
 
             frame = frame_read.frame
             #frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB) # no need for my Tello
-            if frame is None or frame.size == 0:
-                continue 
             (H, W) = frame.shape[:2]
 
             # MOT
@@ -253,6 +260,14 @@ class FrontEnd(object):
         if self.send_rc_control:
             self.tello.send_rc_control(self.left_right_velocity, self.for_back_velocity,
                 self.up_down_velocity, self.yaw_velocity)
+    
+    def _sendingCommand(self):
+        """
+        start a while loop that sends 'command' to Tello every 10 second
+        """    
+        while True:
+            self.tello.send_control_command("command")
+            time.sleep(10)
 
 
 def main():
