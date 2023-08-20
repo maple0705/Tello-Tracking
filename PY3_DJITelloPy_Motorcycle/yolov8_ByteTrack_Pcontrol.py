@@ -176,7 +176,7 @@ class FrontEnd(object):
                     # P(ID) control if flying
                     if self.auto_pilot:
                         gain_yaw = 0.2      # OK to fix(in the room)
-                        gain_forback = 0    # need to adjust(0.1?)
+                        gain_forback = 0.6   # need to adjust(0.1?)
                         gain_updown = 0.2   # OK to fix(in the room)
                         error_x = W / 2 - center_x  # target(center of screen) - output
                         error_y = H / 2 - center_y  # target(center of screen) - output
@@ -185,7 +185,7 @@ class FrontEnd(object):
                         print(int(gain_forback * error_h))
                         if abs(error_x) < deadband / 2: error_x = 0
                         if abs(error_y) < deadband / 2: error_y = 0
-                        if abs(error_h) < deadband / 2: error_h = 0
+                        if abs(error_h) < deadband / 4: error_h = 0
                         self.left_right_velocity = 0
                         self.for_back_velocity   = int(np.clip(+1 * int(gain_forback * error_h), -100, 100))
                         self.up_down_velocity    = int(np.clip(+1 * int(gain_updown * error_y), -100, 100))
